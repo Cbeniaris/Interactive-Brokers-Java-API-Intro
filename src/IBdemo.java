@@ -5,16 +5,13 @@ import com.ib.client.EReaderSignal;
 
 public class IBdemo {
 
-	private class Contracts {
-		public static Contract SPY() {
-			Contract contract = new Contract();
-			contract.symbol("SPY");
-			contract.secType("STK");
-			contract.currency("USD");
-			contract.exchange("SMART");
-			contract.primaryExch("ARCA");
-			return contract;
-		}
+	public static Contract SpyContract() {
+		Contract contract = new Contract();  // create a contract object
+		contract.symbol("SPY"); // Assign the symbol/ticker to be "SPY"
+		contract.secType("STK"); // Security Type:  STK (Stock), OPT (option), etc
+		contract.currency("USD"); // Specified currency
+		contract.exchange("ARCA"); // The stock exchange to look at
+		return contract;
 	}
 
     public static void main(String[] args) throws Exception {
@@ -23,7 +20,7 @@ public class IBdemo {
         final EReaderSignal m_signal = wrapper.getSignal();
         // m_client.setConnectOptions("+PACEAPI");
 
-        m_client.eConnect("127.0.0.1", 7497, 2); //Establish a connection on Local Host, to a paper account, with the client ID of 2
+        m_client.eConnect("127.0.0.1", 7497, 1); //Establish a connection on Local Host, to a paper account, with the client ID of 1
 		final EReader reader = new EReader(m_client, m_signal); 
 		
 		/*
@@ -55,7 +52,7 @@ public class IBdemo {
 		// In a production application, it would be best to wait for callbacks to confirm the connection is complete
 		Thread.sleep(1000);
 
-		m_client.reqMktData(1001, Contracts.SPY(), "", false, false, null);
+		m_client.reqMktData(1001, SpyContract(), "", false, false, null);
 
 		Thread.sleep(100000);
 		m_client.eDisconnect();
