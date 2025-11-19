@@ -20,8 +20,9 @@ public class IBdemo {
         final EReaderSignal m_signal = wrapper.getSignal();
         // m_client.setConnectOptions("+PACEAPI");
 
-        m_client.eConnect("127.0.0.1", 7497, 1); //Establish a connection on Local Host, to a paper account, with the client ID of 1
+        m_client.eConnect("127.0.0.1", 7497, 2); //Establish a connection on Local Host, to a paper account, with the client ID of 1
 		final EReader reader = new EReader(m_client, m_signal); 
+		reader.start();  //it is crucial that you start the reader
 		
 		/*
 		 *
@@ -51,10 +52,11 @@ public class IBdemo {
 		// A pause to give the application time to establish the connection
 		// In a production application, it would be best to wait for callbacks to confirm the connection is complete
 		Thread.sleep(1000);
+		int nextId = wrapper.getCurrentOrderId();
+		Thread.sleep(1000);
+		m_client.reqMktData(nextId++, SpyContract(), "", false, false, null);
 
-		m_client.reqMktData(1001, SpyContract(), "", false, false, null);
-
-		Thread.sleep(100000);
+		Thread.sleep(10000);
 		m_client.eDisconnect();
     }
 }

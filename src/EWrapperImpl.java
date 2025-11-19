@@ -373,10 +373,7 @@ public class EWrapperImpl implements EWrapper {
 	//! [connectack]
 	@Override
 	public void connectAck() {
-		if (clientSocket.isAsyncEConnect()) {
-			System.out.println("Acknowledging connection");
-			clientSocket.startAPI();
-		}
+		System.out.println("TWS API Connection Established");
 	}
 	//! [connectack]
 	

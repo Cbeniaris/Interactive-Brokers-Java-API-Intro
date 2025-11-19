@@ -13,6 +13,7 @@ https://www.interactivebrokers.com/campus/ibkr-api-page/twsapi-doc/#api-introduc
 	- A funded and opened IBKR Pro account
 	- The current Stable or Latest release of the TWS or IB Gateway
 	- The current Stable or Latest release of the TWS API (Stable 10.37 at creation)
+	- Google Protocol Buffer Library Version 4.29.3
 
 ### TWS Setup
 
@@ -86,9 +87,11 @@ the eConnect method takes 3 arguments:
 In this example we use localhost, port 7497 (7497 for paper, 7496 for live), and client ID 1.
 Each connected API client is assigned an ID. The API client will only be able to see orders placed that are from its own ID with one exception.  ID 0 is your master client by default.  It can see all orders from all connected API clients and can also see manual orders placed. This can be used for order management in more complex applications.  The designated master ID can be set in the TWS global config.
 
-Lastly initialize the EReader using the EClientSocket and EReaderSignal
+Lastly initialize the EReader using the EClientSocket and EReaderSignal and start the reader
+
 ```java
 final EReader reader = new EReader(m_client, m_signal); 
+reader.start();
 ```
 
 Now we spin up a new thread that will wait and listen for any return calls from TWS before processing them.  In this example we wait 1 second for the ensure there is a connection to TWS before moving on.  In production code, it is highly recommended that you wait for a callback before continuing rather than waiting a set amount of time.
@@ -111,10 +114,11 @@ At this point, you are ready to send and recieve API calls from TWS.
 
 ### Step 3: Setting up a Data Stream
 
-Outside of the Main method, we established a private SpyContract method using the example above. With that, we can open a data stream.  In our main method, after opening our thread and waiting, we can use the method reqMktData to request live data.
+Outside of the Main method, we established a private SpyContract method using the example above. With that, we can open a data stream.  In our main method, after opening our thread and waiting, we can use the method reqMktData to request live data.  We initialize a "nextId" variable as each call to the api __requires__ a unique id number.  The wrapper will automatically be sent next valid order ID on each successful connection to TWS.  It is important keep track of this next valid ID in order to continue making calls to the API
 
 ```java
-m_client.reqMktData(1001, SpyContract(), "", false, false, null);
+int nextId = wrapper.getCurrentOrderId();
+m_client.reqMktData(nextId++, SpyContract(), "", false, false, null);
 ```
 
 For now we can ignore the last 3 arguments of this method as they are outside the scope of this guide.  The first argument is out "tickerId" which can be used to identify which data stream we are looking at in our callback data.  The second argument is the Contract that we made previously. 
@@ -132,7 +136,7 @@ Now that our data stream is open, we can move our attention to the Wrapper to ha
 	}
 ```
 
-It's at this point it should be noted that Interactive Brokers provides what they call "Filtered Data".  They will provide 4 prices per second, per data stream.  Unless you are doing sub-second trading this should be more than enough data to cover your needs.  We've now successfully opened a data stream that will print the price of SPY to the console.  
+It's at this point it should be noted that Interactive Brokers provides what they call "Filtered Data".  They will provide 4 prices per second, per data stream.  Unless you are doing sub-second trading this should be more than enough data to cover your needs.  We've now successfully opened a data stream that will print the price of SPY to the console.  You will notice there is a "tick price" method being invoked in the wrapper as well.  This is because a market data stream splits price and size relevent information into their own separate methods.  
 
 ### What Next?
 
